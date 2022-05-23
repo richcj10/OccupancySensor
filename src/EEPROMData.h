@@ -7,8 +7,10 @@
 
 char GetAddressFromEEPROM();
 char SetAddressFromEEPROM(char NewAddress);
-int GetScanRateFromEEPROM();
-char SetScanRateFromEEPROM(unsigned int NewRate);
+char GetScanRateFromEEPROM();
+char SetScanRateFromEEPROM(char NewRate);
+char CheckCRC();
 unsigned long eeprom_crc(void);
+unsigned long eeprom_crc_all(void);
 
 #endif
