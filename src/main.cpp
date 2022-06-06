@@ -9,10 +9,11 @@
 unsigned long previousMillis = 0;
 unsigned long previousLEDMillis = 0;
 unsigned int SensorTestTime = 3;
+long holdingRegisterValue = 0;
 
 void ComunicationUpdate(){
   ModbusRTUServer.poll();
-  long holdingRegisterValue = ModbusRTUServer.holdingRegisterRead(0);
+  holdingRegisterValue = ModbusRTUServer.holdingRegisterRead(1);
   if (holdingRegisterValue == SENSOR_CHANGE_ADDRESS) {
     //NewAddress
     SetAddressFromEEPROM((char)ModbusRTUServer.holdingRegisterRead(1));
@@ -21,7 +22,13 @@ void ComunicationUpdate(){
     //NewScanRate
     SetScanRateFromEEPROM((char)ModbusRTUServer.holdingRegisterRead(1));
   }
-  else{
+  else if (holdingRegisterValue == SENSOR_SET_LED) {
+    //NewScanRate
+    int High = ModbusRTUServer.holdingRegisterRead(2);
+    int Low = ModbusRTUServer.holdingRegisterRead(3);
+    UpdatePixels(lowByte(High), highByte(Low), lowByte(Low));
+  }
+/*   else{
     //Do Nothing, Wrong Config
     digitalWrite(LED,!digitalRead(LED));
     delay(50);
@@ -31,11 +38,15 @@ void ComunicationUpdate(){
     delay(50);
     digitalWrite(LED,!digitalRead(LED));
     delay(50);
-  }
-  ModbusRTUServer.inputRegisterWrite(1, GetSensorValues(SENSOR_BIAS));
-  ModbusRTUServer.inputRegisterWrite(2, GetSensorValues(SENSOR_INPUT_1));
-  ModbusRTUServer.inputRegisterWrite(3, GetSensorValues(SENSOR_INPUT_2));
-  ModbusRTUServer.inputRegisterWrite(4, GetSensorValues(SENSOR_INPUT_3));
+  } */
+  ModbusRTUServer.inputRegisterWrite(1, GetSensorValues(SENSOR_INPUT_TEMP1)*100);
+  ModbusRTUServer.inputRegisterWrite(2, GetSensorValues(SENSOR_INPUT_TEMP2)*100);
+  ModbusRTUServer.inputRegisterWrite(3, GetSensorValues(SENSOR_INPUT_HUMID1)*100);
+  ModbusRTUServer.inputRegisterWrite(4, GetSensorValues(SENSOR_INPUT_HUMID2)*100);
+  ModbusRTUServer.inputRegisterWrite(5, GetSensorValues(SENSOR_INPUT_PRES));
+  ModbusRTUServer.inputRegisterWrite(6, GetSensorValues(SENSOR_INPUT_LUX));
+
+  ModbusRTUServer.coilWrite(SENSOR_MOTION, digitalRead(MOTION)); //Auto Relay Control - Default ON
   //ModbusRTUServer.coilWrite(SENSOR_RELAY, ReadRelayState());
 }
 
@@ -46,12 +57,10 @@ void setup() {
 
   pinMode(DIR,OUTPUT);
   pinMode(LED,OUTPUT);
-  pinMode(SENSORPWR,OUTPUT);
-  pinMode(RELAY,OUTPUT);
+  pinMode(MOTION,INPUT);
+  pinMode(IR,INPUT);
   digitalWrite(DIR,LOW);
   digitalWrite(LED,LOW);
-  digitalWrite(SENSORPWR,LOW);
-  digitalWrite(RELAY,LOW);
 
   char Adr = GetAddressFromEEPROM();
   if(Adr == -1){
@@ -61,7 +70,7 @@ void setup() {
     }
   }
   else{
-    if (!ModbusRTUServer.begin(Adr, 38400)) {
+    if (!ModbusRTUServer.begin(OCCUPYSENSORADDRESS, 38400)) {
       Serial.println("Failed to start Modbus RTU Server!");
       while (1);
     }
@@ -73,14 +82,12 @@ void setup() {
 
 
   // configure a single coil at address 0x00
-  ModbusRTUServer.configureCoils(0x00, 4); //Relay Control [Sensor "scan" Enable,Motion Sensor,Enable USER LED(Neopixel),Service LED]
-  ModbusRTUServer.configureInputRegisters(0x00, 5);  //Occupy Sensor Values [SensorType,Temp,Humidity,AQI,Light]
-  ModbusRTUServer.configureHoldingRegisters(0x00, 3); //Control I/O 
-  ModbusRTUServer.inputRegisterWrite(0, OCCUPYSENSORTYPE);// Add Sensor Type, this is fixed. 
+  ModbusRTUServer.configureCoils(0x01, 4); //[Sensor "scan" Enable,Motion Sensor,Enable USER LED(Neopixel),Service LED]
+  ModbusRTUServer.configureInputRegisters(0x01, 8);  //Occupy Sensor Values [SensorType,Temp,Humidity,AQI,Light]
+  ModbusRTUServer.configureHoldingRegisters(0x01, 3); //Control I/O 
+  ModbusRTUServer.inputRegisterWrite(0, OCCUPYSENSORTYPE);
   ModbusRTUServer.coilWrite(SENSOR_SCAN_EN, 1); //Sensor Scan Enable - Default ON
-  ModbusRTUServer.coilWrite(SENSOR_LED_CONTROL, 0); //LED Control - Default ON
-  ModbusRTUServer.coilWrite(AUTO_SENSOR_RELAY_CONTROL, 1); //Auto Relay Control - Default ON
-  ModbusRTUServer.coilWrite(SENSOR_RELAY, 0); //Relay Control - Default OFF
+  ModbusRTUServer.coilWrite(SENSOR_LED_CONTROL, 1); //LED Control - Default ON
 
   char ScanRate = GetScanRateFromEEPROM();
   if(ScanRate != -1){

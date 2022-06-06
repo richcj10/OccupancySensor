@@ -1,10 +1,12 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
-#define SENSOR_BIAS 0
-#define SENSOR_INPUT_1 1
-#define SENSOR_INPUT_2 2
-#define SENSOR_INPUT_3 3
+#define SENSOR_INPUT_TEMP1 1
+#define SENSOR_INPUT_TEMP2 2
+#define SENSOR_INPUT_HUMID1 3
+#define SENSOR_INPUT_HUMID2 4
+#define SENSOR_INPUT_PRES 5
+#define SENSOR_INPUT_LUX 6
 
 void SensorStart();
 void ReadSensors();
