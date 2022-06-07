@@ -8,11 +8,13 @@
 #define SENSOR_INPUT_PRES 5
 #define SENSOR_INPUT_LUX 6
 #define SENSOR_INPUT_VIN 7
+#define SENSOR_INPUT_MOTION 8
 
 void SensorStart();
 void ReadSensors();
-int GetSensorValues(char Type);
+float GetSensorValues(char Type);
 void UpdatePixels(unsigned char R, unsigned char G, unsigned char B);
-void SampleInput();
+void SampleVin();
+void DebounceMotionSensor();
 
 #endif
