@@ -7,10 +7,12 @@
 #define SENSOR_INPUT_HUMID2 4
 #define SENSOR_INPUT_PRES 5
 #define SENSOR_INPUT_LUX 6
+#define SENSOR_INPUT_VIN 7
 
 void SensorStart();
 void ReadSensors();
 int GetSensorValues(char Type);
 void UpdatePixels(unsigned char R, unsigned char G, unsigned char B);
+void SampleInput();
 
 #endif

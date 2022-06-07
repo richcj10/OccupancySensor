@@ -1,4 +1,5 @@
 #include "Sensor.h"
+#include "Define.h"
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_NeoPixel.h>
@@ -18,6 +19,7 @@ float Humidity1 = 0;
 float Humidity2 = 0;
 int hPA = 0;
 int lux = 0;
+float Vin = 0;
 
 // When setting up the NeoPixel library, we tell it how many pixels,
 // and which pin to use to send signals. Note that for older NeoPixel
@@ -45,6 +47,7 @@ void ReadSensors(){
   float Humidity2 = BME280readFloatHumidity();
   int hPA = BME280readFloatPressure();
   int lux = TSL2591getLuminosity(TSL2591_VISIBLE);
+  SampleInput();
 }
 
 void UpdatePixels(unsigned char R, unsigned char G, unsigned char B){
@@ -80,4 +83,29 @@ int GetSensorValues(char Type){
   return 0;
 }
 
+#define numReadings 10
 
+int readings[numReadings];      // the readings from the analog input
+int readIndex = 0;              // the index of the current reading
+long total = 0;                  // the running total
+
+void SampleInput(){
+  total = total - readings[readIndex];
+  // read from the sensor:
+  readings[readIndex] = analogRead(VOLTSENSE);
+  // add the reading to the total:
+  total = total + readings[readIndex];
+  // advance to the next position in the array:
+  readIndex = readIndex + 1;
+
+  // if we're at the end of the array...
+  if (readIndex >= numReadings) {
+    // ...wrap around to the beginning:
+    readIndex = 0;
+  }
+
+  // calculate the average:
+  Vin = (total / numReadings)*(3.3/1024)*5.57;
+  Serial.print("Vin = ");
+  Serial.println(Vin);
+}
