@@ -41,7 +41,7 @@ void ComunicationUpdate(){
 }
 
 void setup() {
-  //SetAddressFromEEPROM(LEAKSENSORADDRESS);
+  SetAddressFromEEPROM(OCCUPYSENSORADDRESS);
   //SetScanRateFromEEPROM(3);
   Serial.begin(38400);
 

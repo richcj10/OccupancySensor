@@ -115,9 +115,9 @@ void SampleVin(){
   }
 
   // calculate the average:
-  Vin = (Vintotal / VOLT_AVG)*(3.3/1024)*5.57;
-  Serial.print("Vin = ");
-  Serial.println(Vin);
+  Vin = (Vintotal / VOLT_AVG)*(3.3/1024)*5.0;
+  //Serial.print("Vin = ");
+  //Serial.println(Vin);
 }
 
 void DebounceMotionSensor(){
