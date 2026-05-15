@@ -3,7 +3,7 @@
 
 #define CRC 0x00
 #define ADDRESS 0x01
-#define SAMPLERATE 0x02 //+1
+#define SAMPLERATE 0x03
 
 char GetAddressFromEEPROM();
 char SetAddressFromEEPROM(char NewAddress);

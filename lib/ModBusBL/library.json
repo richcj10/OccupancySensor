@@ -1,0 +1,27 @@
+{
+  "name": "ModBusBL",
+  "version": "1.0.0",
+  "description": "ModBus RTU slave library with OTA bootloader trigger for ATmega328P over RS-485. Handles FC65 trigger, EEPROM slave ID persistence, and all standard ModBus register types.",
+  "keywords": [
+    "modbus",
+    "rs485",
+    "bootloader",
+    "ota",
+    "avr",
+    "atmega328p",
+    "rs-485"
+  ],
+  "authors": [
+    {
+      "name": "Richard Johnson",
+      "email": "richcj10@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/richcj10/ModBusBL.git"
+  },
+  "license": "MIT",
+  "platforms": "atmelavr",
+  "frameworks": "arduino"
+}

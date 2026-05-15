@@ -37,32 +37,15 @@ char SetAddressFromEEPROM(char NewAddress){
 }
 
 char GetScanRateFromEEPROM(){
-    char ReturnVar = 0;
-    if(CheckCRC()){
-        ReturnVar = EEPROM.read(SAMPLERATE);
+    char ReturnVar = EEPROM.read(SAMPLERATE);
+    if (ReturnVar > 0 && (unsigned char)ReturnVar != 0xFF)
         return ReturnVar;
-    }
-    else{
-        return -1;
-    }
+    return -1;
 }
 
 char SetScanRateFromEEPROM(char NewRate){
-    char error = 0;
-    EEPROM.write(SAMPLERATE,NewRate);
-    if(EEPROM.read(SAMPLERATE) != NewRate){
-        error++;
-    }
-    if(error == 0){
-        unsigned long crcReturn = eeprom_crc();
-        CurrentPosition.position = crcReturn;
-        EEPROM.write(EEPROM.length()-4, CurrentPosition.bytes[3]);
-        EEPROM.write(EEPROM.length()-3, CurrentPosition.bytes[2]);
-        EEPROM.write(EEPROM.length()-2, CurrentPosition.bytes[1]);
-        EEPROM.write(EEPROM.length()-1, CurrentPosition.bytes[0]);
-        return 1;
-    }
-    return -1;
+    EEPROM.write(SAMPLERATE, NewRate);
+    return (EEPROM.read(SAMPLERATE) == NewRate) ? 1 : -1;
 }
 
 unsigned long eeprom_crc(void) {
