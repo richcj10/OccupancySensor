@@ -17,9 +17,9 @@ void ComunicationUpdate() {
 
     long holdingRegisterValue = modbus.getHolding(0); // bus holding reg 1
     if (holdingRegisterValue == SENSOR_CHANGE_ADDRESS) {
-        SetAddressFromEEPROM((char)modbus.getHolding(0));
+        SetAddressFromEEPROM((char)modbus.getHolding(1));
     } else if (holdingRegisterValue == SENSOR_CHANGE_SCANRATE) {
-        SetScanRateFromEEPROM((char)modbus.getHolding(0));
+        SetScanRateFromEEPROM((char)modbus.getHolding(1));
     } else if (holdingRegisterValue == SENSOR_SET_LED) {
         int High = modbus.getHolding(1); // bus holding reg 2
         int Low  = modbus.getHolding(2); // bus holding reg 3

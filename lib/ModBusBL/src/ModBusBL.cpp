@@ -26,6 +26,7 @@ void ModBusBL::begin(long baud) {
     _instance = this;
 
     /* Load slave ID from EEPROM; initialise to default if unset (0xFF). */
+    //EEPROM.write(MBBP_EE_SLAVE_ID, 5);
     uint8_t stored = EEPROM.read(MBBP_EE_SLAVE_ID);
     if (stored >= 1 && stored <= 247)
         _slaveId = stored;
