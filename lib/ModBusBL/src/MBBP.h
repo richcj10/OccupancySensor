@@ -55,11 +55,15 @@
 
 /* ── EEPROM layout ───────────────────────────────────────────────────────── */
 #define MBBP_EE_BOOT_FLAG       0x00    /* 0xB0 = enter bootloader, 0xFF = normal */
-#define MBBP_EE_SLAVE_ID        0x01    /* Modbus slave ID (1-247), 0xFF = unset */
+#define MBBP_EE_SLAVE_ID        0x01    /* Modbus slave ID (1-247) */
 #define MBBP_EE_APP_VALID       0x02    /* 0xA5 = valid app exists, else invalid */
+/* 0x03 reserved for application scan rate */
+#define MBBP_EE_SLAVE_INIT      0x04    /* sentinel: 0xA5 = SLAVE_ID was intentionally set */
 
 #define MBBP_BOOT_FLAG_VAL      0xB0
 #define MBBP_APP_VALID_VAL      0xA5
+#define MBBP_SLAVE_INIT_VAL     0xA5    /* written alongside MBBP_EE_SLAVE_ID by setSlaveId() */
+#define MBBP_ADDR_CHANGE_KEY    0xA5B0  /* master writes this to holding reg 1 alongside new ID in reg 0 (FC16) */
 
 /* Default slave address — override per board via -DMBBP_SLAVE_ADDR=n in build_flags */
 #ifndef MBBP_SLAVE_ADDR

@@ -25,15 +25,14 @@ void ModBusBL::begin(long baud) {
     /* Only one ModBusBL instance may exist (static callback limitation). */
     _instance = this;
 
-    /* Load slave ID from EEPROM; initialise to default if unset (0xFF). */
-    //EEPROM.write(MBBP_EE_SLAVE_ID, 5);
-    uint8_t stored = EEPROM.read(MBBP_EE_SLAVE_ID);
-    if (stored >= 1 && stored <= 247)
+    /* Load slave ID only if both the ID and sentinel key are valid.
+       Prevents accidental address changes from EEPROM noise or partial writes. */
+    uint8_t stored   = EEPROM.read(MBBP_EE_SLAVE_ID);
+    uint8_t sentinel = EEPROM.read(MBBP_EE_SLAVE_INIT);
+    if (stored >= 1 && stored <= 247 && sentinel == MBBP_SLAVE_INIT_VAL)
         _slaveId = stored;
-    else {
+    else
         _slaveId = MBBP_SLAVE_ADDR;
-        EEPROM.write(MBBP_EE_SLAVE_ID, _slaveId);
-    }
 
     /* Expose slave ID on holding register 0. */
     _holding[0] = _slaveId;
@@ -46,15 +45,19 @@ void ModBusBL::begin(long baud) {
 }
 
 void ModBusBL::update() {
-    /* Keep reg 0 in sync with current slave ID (may have been changed). */
     _holding[0] = _slaveId;
 
     _errorCount = modbus_update(_holding, _input, _coil, _di);
 
-    /* If the master wrote a new slave ID to reg 0, persist it. */
-    uint16_t newId = _holding[0];
-    if (newId >= 1 && newId <= 247 && (uint8_t)newId != _slaveId)
-        setSlaveId((uint8_t)newId);
+    /* Address change: master must write FC16 to regs 0+1 atomically.
+       Reg 0 = new slave ID, reg 1 = MBBP_ADDR_CHANGE_KEY.
+       Single-register writes to reg 0 alone are ignored. */
+    if (_holding[1] == MBBP_ADDR_CHANGE_KEY) {
+        uint16_t newId = _holding[0];
+        if (newId >= 1 && newId <= 247 && (uint8_t)newId != _slaveId)
+            setSlaveId((uint8_t)newId);
+        _holding[1] = 0;  /* consume the key so app doesn't see it */
+    }
 }
 
 /* ── Holding registers ──────────────────────────────────────────────────── */
@@ -102,9 +105,10 @@ uint8_t ModBusBL::slaveId() const { return _slaveId; }
 
 void ModBusBL::setSlaveId(uint8_t id) {
     if (id < 1 || id > 247) return;
-    _slaveId   = id;
+    _slaveId    = id;
     _holding[0] = id;
-    EEPROM.update(MBBP_EE_SLAVE_ID, id);
+    EEPROM.update(MBBP_EE_SLAVE_ID,   id);
+    EEPROM.update(MBBP_EE_SLAVE_INIT, MBBP_SLAVE_INIT_VAL);
 }
 
 /* ── Bootloader trigger ─────────────────────────────────────────────────── */

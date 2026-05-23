@@ -5,6 +5,10 @@
 #include "Sensor.h"
 #include "Define.h"
 
+#include <EEPROM.h>
+
+
+
 unsigned long previousMillis = 0;
 unsigned long previousLEDMillis = 0;
 unsigned int SensorTestTime = 3;
@@ -16,9 +20,7 @@ void ComunicationUpdate() {
     modbus.update();
 
     long holdingRegisterValue = modbus.getHolding(0); // bus holding reg 1
-    if (holdingRegisterValue == SENSOR_CHANGE_ADDRESS) {
-        SetAddressFromEEPROM((char)modbus.getHolding(1));
-    } else if (holdingRegisterValue == SENSOR_CHANGE_SCANRATE) {
+    if (holdingRegisterValue == SENSOR_CHANGE_SCANRATE) {
         SetScanRateFromEEPROM((char)modbus.getHolding(1));
     } else if (holdingRegisterValue == SENSOR_SET_LED) {
         int High = modbus.getHolding(1); // bus holding reg 2
@@ -38,6 +40,10 @@ void ComunicationUpdate() {
 }
 
 void setup() {
+
+    //EEPROM.update(MBBP_EE_SLAVE_ID, 0x04);
+    //EEPROM.update(MBBP_EE_SLAVE_INIT, MBBP_SLAVE_INIT_VAL);
+
     pinMode(LED, OUTPUT);
     pinMode(MOTION, INPUT);
     pinMode(IR, INPUT);
@@ -47,7 +53,7 @@ void setup() {
     modbus.begin(38400);
 
     // reg 0: combined identity word — master validates via swVersion = (type<<8)|version
-    modbus.setInput(0, FIRMWARE_VERSION);
+    modbus.setInput(0, ((uint16_t)OCCUPYSENSORTYPE << 8) | FIRMWARE_VERSION);
     modbus.setInput(1, OCCUPYSENSORTYPE);
     modbus.setCoil(SENSOR_SCAN_EN,    true);
     modbus.setCoil(SENSOR_LED_CONTROL, true);

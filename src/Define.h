@@ -9,11 +9,9 @@
 #define LED 7
 
 //SENSOR DEFINE
-#define OCCUPYSENSORADDRESS 0x10
 #define OCCUPYSENSORTYPE    12
 #define FIRMWARE_VERSION    1       /* bump this on any breaking register layout change */
 
-#define SENSOR_CHANGE_ADDRESS 10
 #define SENSOR_CHANGE_SCANRATE 11
 #define SENSOR_SET_LED 12
 
@@ -25,5 +23,6 @@
 
 #define SENSORSCANRATE 2
 #define SENSORTESTTIMEMULTIPLYER 1000
+
 
 #endif
