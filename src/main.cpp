@@ -41,14 +41,14 @@ void ComunicationUpdate() {
 
 void setup() {
 
-    //EEPROM.update(MBBP_EE_SLAVE_ID, 0x04);
-    //EEPROM.update(MBBP_EE_SLAVE_INIT, MBBP_SLAVE_INIT_VAL);
-
     pinMode(LED, OUTPUT);
     pinMode(MOTION, INPUT);
     pinMode(IR, INPUT);
 
-    // begin() reads slave ID from EEPROM[0x01], defaults to MBBP_SLAVE_ADDR (0x10).
+    // begin() uses the slave ID from EEPROM 0x01 only if the address record is
+    // valid (0x03 = 0xA5 sentinel, 0x04 = ~ID); otherwise it falls back to
+    // MBBP_SLAVE_ADDR (0x10) and eepromValid() returns false. The app never
+    // writes the record: set the address with mbbp_flash.py --new-address.
     // Also initialises Serial and the RS-485 DIR pin internally.
     modbus.begin(38400);
 
